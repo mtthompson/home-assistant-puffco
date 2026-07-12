@@ -32,7 +32,8 @@ BLE_DISCOVERY_SERVICES = BLE_CONNECT_SERVICES
 # Known Peak Pro BLE address prefixes
 PEAK_PRO_MAC_PREFIXES = ("84:2E:14:", "84:FD:27:", "0C:43:14:", "F0:AD:4E:")
 
-# Puffco manufacturer data key (Bluetooth SIG company identifier)
+# Puffco manufacturer data key (not a registered Bluetooth SIG company ID;
+# Puffco uses this internally in advertisement manufacturer_data)
 PUFFCO_MANUFACTURER_ID = 3075  # 0x0C03
 
 REVISION_CHARS = "ABCDEFGHJKMNPRTUVWXYZ"

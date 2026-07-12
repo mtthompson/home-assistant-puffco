@@ -225,7 +225,7 @@ class PuffcoConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
         return self.async_show_progress(
             step_id="scan",
             progress_action="scanning",
-            progress_task=self._async_run_scan(),
+            progress_task=self.hass.async_create_task(self._async_run_scan()),
         )
 
     async def _async_run_scan(self) -> None:

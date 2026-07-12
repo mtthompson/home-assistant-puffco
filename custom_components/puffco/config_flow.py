@@ -225,6 +225,7 @@ class PuffcoConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
         return self.async_show_progress(
             step_id="scan",
             progress_action="scanning",
+            description_placeholders={"timeout": str(SCAN_TIMEOUT_S)},
             progress_task=self.hass.async_create_task(self._async_run_scan()),
         )
 

@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import asyncio
 import contextlib
+import logging
 import os
 import re
 import sys
@@ -54,6 +55,8 @@ OPTION_SCAN = "__scan__"
 OPTION_MANUAL = "__manual__"
 SCAN_TIMEOUT_S = 15
 
+_LOGGER = logging.getLogger(__name__)
+
 
 def _ble_device(info: BluetoothServiceInfoBleak) -> BLEDevice:
     if device := getattr(info, "device", None):
@@ -102,14 +105,34 @@ async def _async_scan_puffco_devices(
         if existing is None or (info.rssi or -999) > (existing.rssi or -999):
             found[info.address] = info
 
+    # Dump all cached BLE devices for debugging
+    cached_count = 0
     for connectable in (True, False):
         for info in async_discovered_service_info(hass, connectable=connectable):
+            cached_count += 1
+            name = info.name or "(unnamed)"
+            uuids = list(info.service_uuids)
+            mfr = dict(info.manufacturer_data) if info.manufacturer_data else {}
+            _LOGGER.debug(
+                "Scan: cached BLE device %s (%s) connectable=%s rssi=%s "
+                "uuids=%s manufacturer_data=%s service_data=%s",
+                name, info.address, connectable, info.rssi,
+                uuids, mfr, dict(info.service_data) if info.service_data else {},
+            )
             _maybe_add(info)
+    _LOGGER.info("Scan: checked %d cached BLE devices, %d matched Puffco", cached_count, len(found))
 
     @callback
     def _on_device(
         service_info: BluetoothServiceInfoBleak, _change: BluetoothChange
     ) -> None:
+        name = service_info.name or "(unnamed)"
+        _LOGGER.debug(
+            "Scan: live advertisement %s (%s) uuids=%s manufacturer_data=%s",
+            name, service_info.address,
+            list(service_info.service_uuids),
+            dict(service_info.manufacturer_data) if service_info.manufacturer_data else {},
+        )
         _maybe_add(service_info)
 
     unregister = bluetooth.async_register_callback(
